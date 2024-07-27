@@ -84,7 +84,6 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
         int combinedDuration = 0;
         for(LoanStep l: loanType.getSteps()){
             combinedDuration += l.getExpectedDurationInDays();
-            System.out.println("ime " + l.getName());
         }
         LoanDetails loanDetails = LoanDetails.builder()
                 .durationCombined("Combined duration of all steps is: " + combinedDuration)
@@ -99,27 +98,61 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
                 .build();
     }
 
+    @Override
+    public LoanResponse deleteLoanByName(String name) {
+        if(!loanTypeRepository.existsByName(name)) return LoanResponse.builder()
+                .responseCode(LoanUtils.LOAN_NOT_EXISTS_CODE)
+                .responseMessage(LoanUtils.LOAN_NOT_EXISTS_MESSAGE)
+                .loanType(null)
+                .loanDetails(null)
+                .build();
 
-//
-//    public LoanType saveLoanType(LoanType loanType) {
-//
-//
-//        return loanTypeRepository.save(loanType);
-//    }
-//
-//    public List<LoanType> getAllLoanTypes() {
-//        return loanTypeRepository.findAll();
-//    }
-//
-//    public Optional<LoanType> getLoanTypeById(Long id) {
-//        return loanTypeRepository.findById(id);
-//    }
-//
-//    public List<LoanType> searchLoanTypesByName(String name) {
-//        return loanTypeRepository.findByNameContaining(name);
-//    }
-//
-//    public void deleteLoanType(Long id) {
-//        loanTypeRepository.deleteById(id);
-//    }
+        loanTypeRepository.deleteById(loanTypeRepository.findByName(name).getId());
+
+        return LoanResponse.builder()
+                .responseCode(LoanUtils.LOAN_DELETED_CODE)
+                .responseMessage(LoanUtils.LOAN_DELETED_MESSAGE)
+                .loanType(null)
+                .loanDetails(null)
+                .build();
+    }
+
+    @Override
+    public LoanResponse deleteLoanById(Long id) {
+        if(!loanTypeRepository.existsById(id)) return LoanResponse.builder()
+                .responseCode(LoanUtils.LOAN_NOT_EXISTS_CODE)
+                .responseMessage(LoanUtils.LOAN_NOT_EXISTS_MESSAGE)
+                .loanType(null)
+                .loanDetails(null)
+                .build();
+
+        loanTypeRepository.deleteById(id);
+
+        return LoanResponse.builder()
+                .responseCode(LoanUtils.LOAN_DELETED_CODE)
+                .responseMessage(LoanUtils.LOAN_DELETED_MESSAGE)
+                .loanType(null)
+                .loanDetails(null)
+                .build();
+    }
+
+    @Override
+    public LoanResponse updateLoanNameById(Long id, LoanRequest loanRequest) {
+        if(!loanTypeRepository.existsById(id)) return LoanResponse.builder()
+                .responseCode(LoanUtils.LOAN_NOT_EXISTS_CODE)
+                .responseMessage(LoanUtils.LOAN_NOT_EXISTS_MESSAGE)
+                .loanType(null)
+                .loanDetails(null)
+                .build();
+
+        loanTypeRepository.updateNameById(id, loanRequest.getName());
+
+        return LoanResponse.builder()
+                .responseCode(LoanUtils.LOAN_UPDATED_CODE)
+                .responseMessage(LoanUtils.LOAN_UPDATED_MESSAGE)
+                .loanType(null)
+                .loanDetails(null)
+                .build();
+    }
+
 }

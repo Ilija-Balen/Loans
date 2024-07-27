@@ -6,6 +6,9 @@ import com.fioneer.homework.dto.LoanResponse;
 
 
 public interface LoanTypeService {
-    LoanResponse createLoan(LoanRequest LoanRequest);
-    LoanResponse searchLoanTypesByName(String name);
+    public LoanResponse createLoan(LoanRequest loanRequest);
+    public LoanResponse searchLoanTypesByName(String name);
+    public LoanResponse deleteLoanByName(String name);
+    public LoanResponse deleteLoanById(Long id);
+    public LoanResponse updateLoanNameById(Long id, LoanRequest loanRequest);
 }

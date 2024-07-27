@@ -12,4 +12,8 @@ public class LoanUtils {
     public static final String STEP_EXISTS_MESSAGE = "STEP ALREADY EXISTS";
     public static final String LOAN_NOT_EXISTS_CODE = "003";
     public static final String LOAN_NOT_EXISTS_MESSAGE = "LOAN DOES NOT EXIST";
+    public static final String LOAN_DELETED_CODE = "005";
+    public static final String LOAN_DELETED_MESSAGE = "LOAN DELETED SUCCESSFULLY";
+    public static final String LOAN_UPDATED_CODE = "006";
+    public static final String LOAN_UPDATED_MESSAGE = "LOAN UPDATED SUCCESSFULLY";
 }
