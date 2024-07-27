@@ -14,15 +14,15 @@ import java.util.List;
 public interface LoanTypeRepository extends JpaRepository<LoanType, Long> {
     List<LoanType> findByNameContaining(String name);
     @Query(value = "SELECT * FROM loan_types", nativeQuery = true)
-    public List<LoanType> findAll();
-    public boolean existsByName(String name);
-    public boolean existsById(Long id);
-    public LoanType findByName(String name);
-    public void deleteById(Long id);
+    List<LoanType> findAll();
+    boolean existsByName(String name);
+    boolean existsById(Long id);
+    LoanType findByName(String name);
+    void deleteById(Long id);
 
     @Modifying
     @Transactional
     @Query(value = "update loan_types set name = :name WHERE id = :id", nativeQuery = true)
-    public int updateNameById(@Param("id") Long id, @Param("name") String name);
+    int updateNameById(@Param("id") Long id, @Param("name") String name);
 
 }

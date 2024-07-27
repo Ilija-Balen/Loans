@@ -22,6 +22,8 @@ public class LoanType {
     @Column(unique = true)
     private String name;
 
+    private String status;
+
     @OneToMany(mappedBy = "loanTypeID", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LoanStep> steps;
 

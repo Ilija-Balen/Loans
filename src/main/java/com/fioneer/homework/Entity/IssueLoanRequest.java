@@ -8,20 +8,18 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name="LoanSteps")
+@Table(name="IssueLoanRequests")
 @Entity
-public class LoanStep {
-
+public class IssueLoanRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private int orderNumber;
-    private int expectedDurationInDays;
-
+    private String firstname;
+    private String lastname;
+    private String loanAmmount;
     private String status;
-    private Long loanTypeID;
 
+    private Long loanTypeID;
 
 }

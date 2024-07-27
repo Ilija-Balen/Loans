@@ -1,5 +1,6 @@
 package com.fioneer.homework.Entity;
 
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,20 +9,17 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name="LoanSteps")
+@Table(name="IssueStepsStatuses")
 @Entity
-public class LoanStep {
-
+public class IssueStepsStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private int orderNumber;
-    private int expectedDurationInDays;
-
     private String status;
-    private Long loanTypeID;
+    private Long IssueLoanRequestId;
+    private Long LoanStepId;
+    private int spentTime;
 
-
+    private int expectedDurationInDays;
 }

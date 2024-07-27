@@ -1,20 +1,18 @@
 package com.fioneer.homework.dto;
 
-
-import com.fioneer.homework.Entity.LoanStep;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoanDetails {
+public class IssueResponse {
 
-    private String durationCombined;
-    private List<LoanStep> loanSteps;
+    private String responseCode;
+    private String responseMessage;
+    private IssueDetails issueDetails;
+
 }

@@ -16,4 +16,16 @@ public class LoanUtils {
     public static final String LOAN_DELETED_MESSAGE = "LOAN DELETED SUCCESSFULLY";
     public static final String LOAN_UPDATED_CODE = "006";
     public static final String LOAN_UPDATED_MESSAGE = "LOAN UPDATED SUCCESSFULLY";
+    public static final String STEP_NOT_EXISTS_CODE = "007";
+    public static final String STEP_NOT_EXISTS_MESSAGE = "STEP DOES NOT EXISTS";
+    public static final String STEP_ENUM_NOT_EXISTS_CODE = "008";
+    public static final String STEP_ENUM_NOT_EXISTS_MESSAGE = "STEP STATUS MUST BE SUCCESSFULL OR FAILED";
+    public static final String PREVIOUS_STEPS_NOT_FINISHED_CODE = "009";
+    public static final String PREVIOUS_STEPS_NOT_FINISHED_MESSAGE = "PREVIOUS STEPS ARE NOT SUCCESSFULLY IMPLEMENTED";
+    public static final String STEP_STATUS_COMPLETED_CODE = "010";
+    public static final String STEP_STATUS_COMPLETED_MESSAGE = " COULD NOT CHANGE THIS STEP, THIS STEP IS ALREADY COMPLETED";
+    public static final String STEP_STATUS_UPDATED_CODE = "011";
+    public static final String STEP_STATUS_UPDATED_MESSAGE = "STEP STATUS SUCCESSFULLY UPDATED";
+
+
 }
