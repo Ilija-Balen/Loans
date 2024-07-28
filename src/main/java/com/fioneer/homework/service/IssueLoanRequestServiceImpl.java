@@ -19,6 +19,7 @@ import com.fioneer.homework.repository.LoanTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -157,8 +158,12 @@ public class IssueLoanRequestServiceImpl implements IssueLoanRequestService{
             totalSpentTime += is.getSpentTime();
         }
 
+        IssueLoanRequest foundLoanRequest = issueLoanRequestRepository.findByIdCustom(issueLoanRequestId);
         IssueDetails issueDetails = IssueDetails.builder()
-                .issueLoanRequestStatus(issueLoanRequestRepository.findByIdCustom(issueLoanRequestId).getStatus())
+                .firstName(foundLoanRequest.getFirstname())
+                .lastName(foundLoanRequest.getLastname())
+                .loanAmmount(foundLoanRequest.getLoanAmmount())
+                .issueLoanRequestStatus(foundLoanRequest.getStatus())
                 .totalExpectedTime(totalExpectedTime)
                 .totalSpentTime(totalSpentTime)
                 .issueStepsStatuses(issueStepsStatuses)
@@ -168,6 +173,28 @@ public class IssueLoanRequestServiceImpl implements IssueLoanRequestService{
                 .responseCode(IssueUtils.ISSUE_FOUND_CODE)
                 .responseMessage(IssueUtils.ISSUE_FOUND_MESSAGE)
                 .issueDetails(issueDetails)
+                .build();
+    }
+
+    @Override
+    public IssueResponse searchByStatus(String status) {
+
+        List<IssueLoanRequest> issueLoanRequests = issueLoanRequestRepository.findAllByStatus(status);
+
+        List<IssueDetails> issueDetails = new ArrayList<IssueDetails>();
+        for(IssueLoanRequest issueLoanRequest : issueLoanRequests){
+            issueDetails.add(infoIssueLoanRequest(issueLoanRequest.getId()).getIssueDetails());
+        }
+
+        if(issueDetails.size() <= 0)return IssueResponse.builder()
+                .responseCode(IssueUtils.ISSUE_NOT_EXISTS_STATUS_CODE)
+                .responseMessage(IssueUtils.ISSUE_NOT_EXISTS_STATUS_MESSAGE + status)
+                .build();
+
+        return IssueResponse.builder()
+                .responseCode(IssueUtils.ISSUE_FOUND_CODE)
+                .responseMessage(IssueUtils.ISSUE_FOUND_MESSAGE)
+                .issueDetailsList(issueDetails)
                 .build();
     }
 }

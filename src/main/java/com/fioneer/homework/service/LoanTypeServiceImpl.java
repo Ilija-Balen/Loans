@@ -7,6 +7,7 @@ import com.fioneer.homework.Utils.LoanUtils;
 import com.fioneer.homework.dto.LoanDetails;
 import com.fioneer.homework.dto.LoanRequest;
 import com.fioneer.homework.dto.LoanResponse;
+import com.fioneer.homework.repository.IssueLoanRequestRepository;
 import com.fioneer.homework.repository.LoanStepRepository;
 import com.fioneer.homework.repository.LoanTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,8 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
 
     @Autowired
     private LoanStepRepository loanStepRepository;
+    @Autowired
+    private IssueLoanRequestRepository issueLoanRequestRepository;
 
     @Override
     public LoanResponse createLoan(LoanRequest loanRequest) {
@@ -107,6 +110,14 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
                 .loanDetails(null)
                 .build();
 
+        //check if there is loan request issued for this loan type
+        if(issueLoanRequestRepository.countAllByLoanTypeID(loanTypeRepository.getIdByName(name)) != 0) return LoanResponse.builder()
+                .responseCode(LoanUtils.LOAN_EXISTS_IN_ISSUE_CODE)
+                .responseMessage(LoanUtils.LOAN_EXISTS_IN_ISSUE_MESSAGE)
+                .loanType(null)
+                .loanDetails(null)
+                .build();
+
         loanTypeRepository.deleteById(loanTypeRepository.findByName(name).getId());
 
         return LoanResponse.builder()
@@ -126,6 +137,14 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
                 .loanDetails(null)
                 .build();
 
+        //check if there is loan request issued for this loan type
+        if(issueLoanRequestRepository.countAllByLoanTypeID(id) != 0) return LoanResponse.builder()
+                .responseCode(LoanUtils.LOAN_EXISTS_IN_ISSUE_CODE)
+                .responseMessage(LoanUtils.LOAN_EXISTS_IN_ISSUE_MESSAGE)
+                .loanType(null)
+                .loanDetails(null)
+                .build();
+
         loanTypeRepository.deleteById(id);
 
         return LoanResponse.builder()
@@ -141,6 +160,14 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
         if(!loanTypeRepository.existsById(id)) return LoanResponse.builder()
                 .responseCode(LoanUtils.LOAN_NOT_EXISTS_CODE)
                 .responseMessage(LoanUtils.LOAN_NOT_EXISTS_MESSAGE)
+                .loanType(null)
+                .loanDetails(null)
+                .build();
+
+        //check if there is loan request issued for this loan type
+        if(issueLoanRequestRepository.countAllByLoanTypeID(id) != 0) return LoanResponse.builder()
+                .responseCode(LoanUtils.LOAN_EXISTS_IN_ISSUE_CODE)
+                .responseMessage(LoanUtils.LOAN_EXISTS_IN_ISSUE_MESSAGE)
                 .loanType(null)
                 .loanDetails(null)
                 .build();

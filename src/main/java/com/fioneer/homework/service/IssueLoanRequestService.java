@@ -7,4 +7,5 @@ public interface IssueLoanRequestService {
     IssueResponse createIssue (IssueRequest issueRequest);
     IssueResponse updateStepStatus (IssueRequest issueRequest);
     IssueResponse infoIssueLoanRequest (Long issueLoanRequestId);
+    IssueResponse searchByStatus (String status);
 }

@@ -19,6 +19,8 @@ public interface LoanTypeRepository extends JpaRepository<LoanType, Long> {
     boolean existsById(Long id);
     LoanType findByName(String name);
     void deleteById(Long id);
+    @Query(value = "SELECT id FROM loan_types where name = :name", nativeQuery = true)
+    Long getIdByName(@Param("name") String name);
 
     @Modifying
     @Transactional

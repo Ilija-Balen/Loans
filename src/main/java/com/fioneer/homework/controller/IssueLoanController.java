@@ -30,4 +30,9 @@ public class IssueLoanController {
     public IssueResponse searchLoanTypesByName(@RequestParam Long id) {
         return issueLoanRequestService.infoIssueLoanRequest(id);
     }
+
+    @GetMapping("/searchByStatus")
+    public IssueResponse searchLoanTypesByStatus(@RequestParam String status) {
+        return issueLoanRequestService.searchByStatus(status);
+    }
 }

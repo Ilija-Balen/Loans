@@ -13,6 +13,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class IssueDetails {
+    private String firstName;
+    private String lastName;
+    private String loanAmmount;
     private String issueLoanRequestStatus;
     private int totalExpectedTime;
     private int totalSpentTime;

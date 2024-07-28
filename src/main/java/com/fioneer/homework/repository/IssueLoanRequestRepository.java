@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface IssueLoanRequestRepository  extends JpaRepository<IssueLoanRequest, Long> {
 
     boolean existsById(Long id);
@@ -20,4 +22,10 @@ public interface IssueLoanRequestRepository  extends JpaRepository<IssueLoanRequ
     @Transactional
     @Query(value = "UPDATE issue_loan_requests SET status = :status WHERE id = :id", nativeQuery = true)
     int updateStatus(@Param("id")Long issueLoanRequestId, @Param("status")String status);
+
+    @Query(value = "SELECT COUNT(*) FROM issue_loan_requests WHERE loan_typeid = :id", nativeQuery = true)
+    int countAllByLoanTypeID(@Param("id") Long loanTypeId);
+
+    @Query(value = "SELECT * FROM issue_loan_requests WHERE status = :status", nativeQuery = true)
+    List<IssueLoanRequest> findAllByStatus(@Param("status") String status);
 }

@@ -26,6 +26,8 @@ public class LoanUtils {
     public static final String STEP_STATUS_COMPLETED_MESSAGE = " COULD NOT CHANGE THIS STEP, THIS STEP IS ALREADY COMPLETED";
     public static final String STEP_STATUS_UPDATED_CODE = "011";
     public static final String STEP_STATUS_UPDATED_MESSAGE = "STEP STATUS SUCCESSFULLY UPDATED";
+    public static final String LOAN_EXISTS_IN_ISSUE_CODE = "012";
+    public static final String LOAN_EXISTS_IN_ISSUE_MESSAGE = "LOAN TYPE IS IN LOAN REQUEST SO IT CAN'T BE DELETED OR UPDATED";
 
 
 }
