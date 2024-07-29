@@ -14,7 +14,8 @@ public interface IssueStepsStatusRepository extends JpaRepository<IssueStepsStat
     @Query(value = "SELECT * from issue_steps_statuses where issue_loan_request_id = :id", nativeQuery = true)
     List<IssueStepsStatus> findAllByIssueLoanRequestId(@Param("id")Long issueLoanRequestId);
 
-    @Query(value = "SELECT id from issue_steps_statuses where issue_loan_request_id = :isl_id and loan_step_id = :id", nativeQuery = true)
+    @Query(value = "SELECT id from issue_steps_statuses where issue_loan_request_id = :isl_id and loan_step_id = :id",
+            nativeQuery = true)
     Long getIdByLoanStepIdAndIssueLoanRequestId(@Param("isl_id")Long issueLoanRequestId, @Param("id")Long loanStepId);
 
     @Query(value = "SELECT status from issue_steps_statuses where id = :id", nativeQuery = true)
@@ -22,13 +23,10 @@ public interface IssueStepsStatusRepository extends JpaRepository<IssueStepsStat
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE issue_steps_statuses SET status = :status WHERE id = :id", nativeQuery = true)
-    int updateStatus(@Param("id")Long issueStepStatusId, @Param("status")String status);
-
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE issue_steps_statuses SET spent_time = :spentTime WHERE id = :id", nativeQuery = true)
-    int updateSpentTime(@Param("id")Long issueStepStatusId, @Param("spentTime")int spentTime);
+    @Query(value = "UPDATE issue_steps_statuses SET status= :status, spent_time = :spentTime WHERE id = :id",
+            nativeQuery = true)
+    int updateStatusAndSpentTime(@Param("id")Long issueStepStatusId, @Param("status")String status,
+                                 @Param("spentTime")int spentTime);
 
     @Query(value = "SELECT COUNT(*) FROM issue_steps_statuses WHERE status == 'pending' " +
             "AND issue_loan_request_id = :issueLoanRequestId " +
@@ -38,7 +36,8 @@ public interface IssueStepsStatusRepository extends JpaRepository<IssueStepsStat
             @Param("loanStepId") Long loanStepId);
 
 
-    @Query(value = "SELECT COUNT(*) FROM issue_steps_statuses WHERE issue_loan_request_id = :issueLoanRequestId", nativeQuery = true)
+    @Query(value = "SELECT COUNT(*) FROM issue_steps_statuses WHERE issue_loan_request_id = :issueLoanRequestId",
+            nativeQuery = true)
     int countAllByIssueLoanRequestId(@Param("issueLoanRequestId") Long issueLoanRequestId);
 
 

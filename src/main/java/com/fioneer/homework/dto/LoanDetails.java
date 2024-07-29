@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class LoanDetails {
 
-    private String durationCombined;
+    private String loanTypeName;
+    private String totalDuration;
     private List<LoanStep> loanSteps;
 }

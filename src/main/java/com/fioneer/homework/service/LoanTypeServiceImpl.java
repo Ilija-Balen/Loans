@@ -12,7 +12,10 @@ import com.fioneer.homework.repository.LoanStepRepository;
 import com.fioneer.homework.repository.LoanTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -26,8 +29,22 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
     @Autowired
     private IssueLoanRequestRepository issueLoanRequestRepository;
 
+    @Transactional
     @Override
     public LoanResponse createLoan(LoanRequest loanRequest) {
+        //check if data all data is present
+        if(loanRequest.getName() == null) return LoanResponse.builder()
+                .responseCode(LoanUtils.LOAN_DATA_MISSING_CODE)
+                .responseMessage(LoanUtils.LOAN_DATA_MISSING_MESSAGE)
+                .loanType(null)
+                .build();
+        for(LoanStep l : loanRequest.getSteps()) if(l.getName() == null || l.getOrderNumber() <= 0
+                || l.getExpectedDurationInDays() <= 0) return LoanResponse.builder()
+                .responseCode(LoanUtils.LOAN_DATA_MISSING_CODE)
+                .responseMessage(LoanUtils.LOAN_DATA_MISSING_MESSAGE)
+                .loanType(null)
+                .build();
+
         //name of loanType must be unique
         if(loanTypeRepository.existsByName(loanRequest.getName())) return LoanResponse.builder()
                 .responseCode(LoanUtils.LOAN_EXISTS_CODE)
@@ -35,16 +52,23 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
                 .loanType(null)
                 .build();
 
+        //check if there is 0 steps
+        if(loanRequest.getSteps() == null) return LoanResponse.builder()
+                .responseCode(LoanUtils.STEP_CANT_BE_NULL_CODE)
+                .responseMessage(LoanUtils.STEP_CANT_BE_NULL_MESSAGE)
+                .loanType(null)
+                .build();
+
         //check if steps are associated with any other loanType
-//        for(LoanStep l: loanRequest.getSteps()){
-//            if(loanStepRepository.existsByNameAndAndOrderNumberAndExpectedDurationInDays
-//                    (l.getName(), l.getOrderNumber(), l.getExpectedDurationInDays()))
-//                return LoanResponse.builder()
-//                    .responseCode(LoanUtils.STEP_EXISTS_CODE)
-//                    .responseMessage(LoanUtils.STEP_EXISTS_MESSAGE)
-//                    .loanType(null)
-//                    .build();
-//        }
+        for(LoanStep l: loanRequest.getSteps()){
+            if(loanStepRepository.existsByNameAndAndOrderNumberAndExpectedDurationInDays
+                    (l.getName(), l.getOrderNumber(), l.getExpectedDurationInDays()))
+                return LoanResponse.builder()
+                    .responseCode(LoanUtils.STEP_EXISTS_CODE)
+                    .responseMessage(LoanUtils.STEP_EXISTS_MESSAGE)
+                    .loanType(null)
+                    .build();
+        }
 
         //create loanType
         LoanType loanType = LoanType.builder()
@@ -54,16 +78,17 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
         //save loanType
         loanTypeRepository.save(loanType);
 
+        List<LoanStep> loanStepList = new ArrayList<>();
         //save all steps required for loanType
         for(LoanStep l: loanRequest.getSteps()){
-            loanStepRepository.save(LoanStep.builder()
+            loanStepList.add(LoanStep.builder()
                             .name(l.getName())
                             .orderNumber(l.getOrderNumber())
                             .expectedDurationInDays(l.getExpectedDurationInDays())
                             .loanTypeID(loanType.getId())
                             .build());
         }
-
+        loanStepRepository.saveAll(loanStepList);
 
         return LoanResponse.builder()
                 .responseCode(LoanUtils.LOAN_CREATED_CODE)
@@ -74,22 +99,21 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
 
     @Override
     public LoanResponse searchLoanTypesByName(String name) {
-
-        if(!loanTypeRepository.existsByName(name)) return LoanResponse.builder()
+        LoanType loanType = loanTypeRepository.findByName(name);
+        if(loanType == null) return LoanResponse.builder()
                 .responseCode(LoanUtils.LOAN_NOT_EXISTS_CODE)
                 .responseMessage(LoanUtils.LOAN_NOT_EXISTS_MESSAGE)
                 .loanType(null)
                 .loanDetails(null)
                 .build();
 
-        LoanType loanType = loanTypeRepository.findByName(name);
-
-        int combinedDuration = 0;
+        int totalDuration = 0;
         for(LoanStep l: loanType.getSteps()){
-            combinedDuration += l.getExpectedDurationInDays();
+            totalDuration += l.getExpectedDurationInDays();
         }
         LoanDetails loanDetails = LoanDetails.builder()
-                .durationCombined("Combined duration of all steps is: " + combinedDuration)
+                .loanTypeName(loanType.getName())
+                .totalDuration("Total duration of all steps is: " + totalDuration)
                 .loanSteps(loanType.getSteps())
                 .build();
 
@@ -103,7 +127,8 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
 
     @Override
     public LoanResponse deleteLoanByName(String name) {
-        if(!loanTypeRepository.existsByName(name)) return LoanResponse.builder()
+        LoanType loanType = loanTypeRepository.findByName(name);
+        if(loanType == null) return LoanResponse.builder()
                 .responseCode(LoanUtils.LOAN_NOT_EXISTS_CODE)
                 .responseMessage(LoanUtils.LOAN_NOT_EXISTS_MESSAGE)
                 .loanType(null)
@@ -111,14 +136,14 @@ public class LoanTypeServiceImpl  implements LoanTypeService{
                 .build();
 
         //check if there is loan request issued for this loan type
-        if(issueLoanRequestRepository.countAllByLoanTypeID(loanTypeRepository.getIdByName(name)) != 0) return LoanResponse.builder()
+        if(issueLoanRequestRepository.countAllByLoanTypeID(loanType.getId()) != 0) return LoanResponse.builder()
                 .responseCode(LoanUtils.LOAN_EXISTS_IN_ISSUE_CODE)
                 .responseMessage(LoanUtils.LOAN_EXISTS_IN_ISSUE_MESSAGE)
                 .loanType(null)
                 .loanDetails(null)
                 .build();
 
-        loanTypeRepository.deleteById(loanTypeRepository.findByName(name).getId());
+        loanTypeRepository.deleteById(loanType.getId());
 
         return LoanResponse.builder()
                 .responseCode(LoanUtils.LOAN_DELETED_CODE)

@@ -18,6 +18,7 @@ import com.fioneer.homework.repository.LoanStepRepository;
 import com.fioneer.homework.repository.LoanTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +35,16 @@ public class IssueLoanRequestServiceImpl implements IssueLoanRequestService{
     @Autowired
     private LoanTypeRepository loanTypeRepository;
 
+   @Transactional
     @Override
     public IssueResponse createIssue(IssueRequest issueRequest) {
+        //check if data all data is present
+        if(issueRequest.getLoanTypeId() == null || issueRequest.getFirstName() == null
+                || issueRequest.getLastName() == null || issueRequest.getLoanAmmount() == null)
+            return IssueResponse.builder()
+                    .responseCode(IssueUtils.ISSUE_DATA_MISSING_CODE)
+                    .responseMessage(IssueUtils.ISSUE_DATA_MISSING_MESSAGE)
+                    .build();
 
         //check if LoanType exists
         if(!loanTypeRepository.existsById(issueRequest.getLoanTypeId())) return IssueResponse.builder()
@@ -55,14 +64,16 @@ public class IssueLoanRequestServiceImpl implements IssueLoanRequestService{
 
         List<LoanStep> loanStepss = loanStepRepository.findAllByLoanTypeId(issueLoanRequest.getLoanTypeID());
 
+        List<IssueStepsStatus> issueStepsStatusesList = new ArrayList<>();
         for(LoanStep is : loanStepss) {
-            issueStepsStatusRepository.save(IssueStepsStatus.builder()
+            issueStepsStatusesList.add(IssueStepsStatus.builder()
                     .LoanStepId(is.getId())
                     .IssueLoanRequestId(issueLoanRequest.getId())
                     .status(String.valueOf(StepEnum.pending))
                     .expectedDurationInDays(is.getExpectedDurationInDays())
                     .build());
         }
+       issueStepsStatusRepository.saveAll(issueStepsStatusesList);
 
         return IssueResponse.builder()
                 .responseCode(IssueUtils.ISSUE_CREATED_CODE)
@@ -70,6 +81,7 @@ public class IssueLoanRequestServiceImpl implements IssueLoanRequestService{
                 .build();
     }
 
+    @Transactional
     @Override
     public IssueResponse updateStepStatus(IssueRequest issueRequest) {
 
@@ -102,15 +114,18 @@ public class IssueLoanRequestServiceImpl implements IssueLoanRequestService{
         //check if status of this step is pending
         Long loanStepId = issueRequest.getLoanStepId();
         Long issueLoanRequestId = issueRequest.getIssueLoanRequestId();
-        Long issueStepStatusId = issueStepsStatusRepository.getIdByLoanStepIdAndIssueLoanRequestId(issueLoanRequestId, loanStepId);
+        Long issueStepStatusId = issueStepsStatusRepository.getIdByLoanStepIdAndIssueLoanRequestId(
+                issueLoanRequestId, loanStepId);
         String status = issueStepsStatusRepository.getStepStatus(issueStepStatusId);
-        if(status.equals("successful") || status.equals("failed"))return IssueResponse.builder()
+        if(status.equals(String.valueOf(StepEnum.successful)) || status.equals(String.valueOf(StepEnum.failed)))
+            return IssueResponse.builder()
                 .responseCode(LoanUtils.STEP_STATUS_COMPLETED_CODE)
                 .responseMessage(LoanUtils.STEP_STATUS_COMPLETED_MESSAGE)
                 .build();
 
         //check if previous steps have been successfully implemented
-        if(issueStepsStatusRepository.countByStatusAndIssueLoanRequestIdAndLoanStepId(issueLoanRequestId,loanStepId) != 0)
+        if(issueStepsStatusRepository.countByStatusAndIssueLoanRequestIdAndLoanStepId(
+                issueLoanRequestId,loanStepId) > 0)
             return IssueResponse.builder()
                     .responseCode(LoanUtils.PREVIOUS_STEPS_NOT_FINISHED_CODE)
                     .responseMessage(LoanUtils.PREVIOUS_STEPS_NOT_FINISHED_MESSAGE)
@@ -118,18 +133,19 @@ public class IssueLoanRequestServiceImpl implements IssueLoanRequestService{
 
 
 
-        //update this status
-        issueStepsStatusRepository.updateStatus(issueStepStatusId, newStepStatus);
-        issueStepsStatusRepository.updateSpentTime(issueStepStatusId, spentTime);
+        //update this status and spentTime
+        issueStepsStatusRepository.updateStatusAndSpentTime(issueStepStatusId, newStepStatus, spentTime);
 
         //check if loan request status can be updated
         String statusOfIssueLoanRequest = issueLoanRequestRepository.getIssueLoanRequestStatusById(issueLoanRequestId);
-        if(!statusOfIssueLoanRequest.equals("rejected") && !statusOfIssueLoanRequest.equals("approved")){
-            if(issueRequest.getNewStepStatus().equals("failed")){
-                issueLoanRequestRepository.updateStatus(issueLoanRequestId, "rejected");
+        if(!statusOfIssueLoanRequest.equals(String.valueOf(IssueLoanEnum.rejected)) &&
+                !statusOfIssueLoanRequest.equals(String.valueOf(IssueLoanEnum.approved))){
+            if(issueRequest.getNewStepStatus().equals(String.valueOf(StepEnum.failed))){
+                issueLoanRequestRepository.updateStatus(issueLoanRequestId, String.valueOf(IssueLoanEnum.rejected));
             }else{
-                if(issueStepsStatusRepository.countAllByIssueLoanRequestId(issueLoanRequestId) == issueStepsStatusRepository.countAllSuccessfulByIssueLoanRequestId(issueLoanRequestId)){
-                    issueLoanRequestRepository.updateStatus(issueLoanRequestId, "approved");
+                if(issueStepsStatusRepository.countAllByIssueLoanRequestId(issueLoanRequestId)
+                        == issueStepsStatusRepository.countAllSuccessfulByIssueLoanRequestId(issueLoanRequestId)){
+                    issueLoanRequestRepository.updateStatus(issueLoanRequestId, String.valueOf(IssueLoanEnum.approved));
                 }
             }
         }
@@ -143,13 +159,15 @@ public class IssueLoanRequestServiceImpl implements IssueLoanRequestService{
     @Override
     public IssueResponse infoIssueLoanRequest(Long issueLoanRequestId) {
 
-        if(!issueLoanRequestRepository.existsById(issueLoanRequestId)) return IssueResponse.builder()
+       IssueLoanRequest foundLoanRequest = issueLoanRequestRepository.findByIdCustom(issueLoanRequestId);
+        if(foundLoanRequest == null) return IssueResponse.builder()
                 .responseCode(IssueUtils.ISSUE_NOT_EXISTS_CODE)
                 .responseMessage(IssueUtils.ISSUE_NOT_EXISTS_MESSAGE)
                 .issueDetails(null)
                 .build();
 
-        List<IssueStepsStatus> issueStepsStatuses= issueStepsStatusRepository.findAllByIssueLoanRequestId(issueLoanRequestId);
+        List<IssueStepsStatus> issueStepsStatuses= issueStepsStatusRepository.findAllByIssueLoanRequestId(
+                issueLoanRequestId);
 
         int totalExpectedTime = 0;
         int totalSpentTime = 0;
@@ -158,7 +176,7 @@ public class IssueLoanRequestServiceImpl implements IssueLoanRequestService{
             totalSpentTime += is.getSpentTime();
         }
 
-        IssueLoanRequest foundLoanRequest = issueLoanRequestRepository.findByIdCustom(issueLoanRequestId);
+
         IssueDetails issueDetails = IssueDetails.builder()
                 .firstName(foundLoanRequest.getFirstname())
                 .lastName(foundLoanRequest.getLastname())
@@ -181,12 +199,12 @@ public class IssueLoanRequestServiceImpl implements IssueLoanRequestService{
 
         List<IssueLoanRequest> issueLoanRequests = issueLoanRequestRepository.findAllByStatus(status);
 
-        List<IssueDetails> issueDetails = new ArrayList<IssueDetails>();
+        List<IssueDetails> issueDetailsList = new ArrayList<>();
         for(IssueLoanRequest issueLoanRequest : issueLoanRequests){
-            issueDetails.add(infoIssueLoanRequest(issueLoanRequest.getId()).getIssueDetails());
+            issueDetailsList.add(infoIssueLoanRequest(issueLoanRequest.getId()).getIssueDetails());
         }
 
-        if(issueDetails.size() <= 0)return IssueResponse.builder()
+        if(issueDetailsList.size() <= 0) return IssueResponse.builder()
                 .responseCode(IssueUtils.ISSUE_NOT_EXISTS_STATUS_CODE)
                 .responseMessage(IssueUtils.ISSUE_NOT_EXISTS_STATUS_MESSAGE + status)
                 .build();
@@ -194,7 +212,7 @@ public class IssueLoanRequestServiceImpl implements IssueLoanRequestService{
         return IssueResponse.builder()
                 .responseCode(IssueUtils.ISSUE_FOUND_CODE)
                 .responseMessage(IssueUtils.ISSUE_FOUND_MESSAGE)
-                .issueDetailsList(issueDetails)
+                .issueDetailsList(issueDetailsList)
                 .build();
     }
 }

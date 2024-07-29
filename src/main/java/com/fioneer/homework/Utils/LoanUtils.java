@@ -23,11 +23,17 @@ public class LoanUtils {
     public static final String PREVIOUS_STEPS_NOT_FINISHED_CODE = "009";
     public static final String PREVIOUS_STEPS_NOT_FINISHED_MESSAGE = "PREVIOUS STEPS ARE NOT SUCCESSFULLY IMPLEMENTED";
     public static final String STEP_STATUS_COMPLETED_CODE = "010";
-    public static final String STEP_STATUS_COMPLETED_MESSAGE = " COULD NOT CHANGE THIS STEP, THIS STEP IS ALREADY COMPLETED";
+    public static final String STEP_STATUS_COMPLETED_MESSAGE = " COULD NOT CHANGE THIS STEP," +
+            " THIS STEP IS ALREADY COMPLETED";
     public static final String STEP_STATUS_UPDATED_CODE = "011";
     public static final String STEP_STATUS_UPDATED_MESSAGE = "STEP STATUS SUCCESSFULLY UPDATED";
     public static final String LOAN_EXISTS_IN_ISSUE_CODE = "012";
-    public static final String LOAN_EXISTS_IN_ISSUE_MESSAGE = "LOAN TYPE IS IN LOAN REQUEST SO IT CAN'T BE DELETED OR UPDATED";
+    public static final String LOAN_EXISTS_IN_ISSUE_MESSAGE = "LOAN TYPE IS IN LOAN REQUEST SO IT CAN'T BE DELETED" +
+            " OR UPDATED";
+    public static final String STEP_CANT_BE_NULL_CODE = "013";
+    public static final String STEP_CANT_BE_NULL_MESSAGE = "YOU CANT PROVIDE 0 STEPS FOR LOANTYPE";
+    public static final String LOAN_DATA_MISSING_CODE = "014";
+    public static final String LOAN_DATA_MISSING_MESSAGE = "MISSING DATA FOR CREATING LOANS";
 
 
 }

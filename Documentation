@@ -1,0 +1,58 @@
+
+PRETPOSTAVKE:
+---Kako bi step bio jedinstven za svaki loanType osigurano je da svi parametri koji se prosledjuju pri kreiranju moraju
+biti jedinstveni unutar tabele loan_steps
+---Ne moze da se radi 0 ili manje dana
+---Pri kreiranju samog stepa, redosled kojim su navedeni pri kreiranju je pravi redosled, samim tim ne moze se odraditi
+update na stepu koji je dodat pre tog stepa
+---Baza se pri pokretanju aplikacije brise ukoliko postoji, kao i pri samom zavrsetku aplikacije
+
+========================================================================================================================
+POSTMAN PRIMERI:
+SVUDA GDE SE SALJE BODY U VIDU JSON-a POTREBNO JE STAVITI U HEADERS DEO Content-Type : application/json
+
+---Primer pravljenja LoanType-a (POST) URL= http://localhost:8080/api/loan-types
+{
+  "name": "CASH Loan",
+  "steps": [
+    {
+      "name": "Salary verification",
+      "orderNumber": 1,
+      "expectedDurationInDays": 5
+    },
+    {
+      "name": "Approval",
+      "orderNumber": 2,
+      "expectedDurationInDays": 1
+    }
+  ]
+}
+
+---Primer dohvatanja LoanType-a (GET) URL= http://localhost:8080/api/loan-types/search?name=CASH Loan
+
+---Primer brisanja LoanType-a po imenu (DELETE) URL= http://localhost:8080/api/loan-types/name/CASH
+
+---Primer brisanja LoanType-a po id-u (DELETE) URL= http://localhost:8080/api/loan-types/id/1
+
+---Primer update-a LoanType-a (PUT) URL= http://localhost:8080/api/loan-types/update/1
+
+---Primer pravljenja IssueLoanType-a (POST) URL= http://localhost:8080/api/issue-loan
+{
+  "loanTypeId" : "1",
+  "firstName": "Marko",
+  "lastName": "Markovic",
+  "loanAmmount" : "10000"
+}
+
+---Primer update-a IssueLoanType-a (PUT) URL= http://localhost:8080/api/issue-loan/update
+{
+    "newStepStatus":"successful",
+    "spentTime":"4",
+    "loanStepId":"1",
+    "issueLoanRequestId":"1"
+}
+
+---Primer dohvatanja IssueLoanType-a po id-u (GET) URL= http://localhost:8080/api/issue-loan/search?id=2
+---Primer dohvatanja IssueLoanType-a po statusu (GET)
+ URL= http://localhost:8080/api/issue-loan/searchByStatus?status=approved
+
